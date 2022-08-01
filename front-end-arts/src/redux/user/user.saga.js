@@ -1,14 +1,16 @@
-import { all, call, put, takeLatest,delay} from "redux-saga/effects";
+import { all, call, put, takeLatest, delay } from "redux-saga/effects";
 import api from "../../api/client";
-import { signInFailure, 
-  signInProcessing, 
+import {
+  signInFailure,
+  signInProcessing,
   signInSuccess,
-  signUpProcessing, 
-  signUpFailure, 
+  signUpProcessing,
+  signUpFailure,
   signUpSuccess,
   saveUserFail,
   saveUserProccesing,
-  saveUserSuccess } from "./user.action";
+  saveUserSuccess,
+} from "./user.action";
 import UserActionTypes from "./user.type";
 
 const callAPILogin = async (loginInfo) => {
@@ -33,12 +35,12 @@ export function* login(loginInfo) {
     yield put(signInSuccess(res.data));
     yield delay(2000);
 
-    if(res.data.userRoles[0]==='admin'){
-      window.location.href = '/admin'
+    if (res.data.userRoles[0] === "admin") {
+      window.location.href = "/admin";
     }
-    if(res.data.userRoles[0]==='user'){
-       window.location.href = '/'
-    }else{
+    if (res.data.userRoles[0] === "user") {
+      window.location.href = "/";
+    } else {
       // window.location.href = '/assistant'
     }
   } catch (error) {
@@ -50,7 +52,6 @@ export function* onSignInStart() {
   yield takeLatest(UserActionTypes.EMAIL_SIGN_IN_START, login);
 }
 
-
 //resgister
 //resgister
 //resgister
@@ -59,17 +60,18 @@ export function* onSignInStart() {
 //resgister
 const callAPIRegister = async (registerInfo) => {
   try {
-    console.log(registerInfo)
-    const res = api.post("/api/Users/CreateUser", registerInfo, {headers: {
-      "Content-Type": "application/json"}
-  });
+    console.log(registerInfo);
+    const res = api.post("/api/Users/CreateUser", registerInfo, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
     return res;
-
   } catch (error) {
-      throw new Error(error.message);
+    throw new Error(error.message);
   }
-}
-export function* register (registerInfo) {
+};
+export function* register(registerInfo) {
   try {
     yield put(signUpProcessing());
     const res = yield call(callAPIRegister, registerInfo.payload);
@@ -77,17 +79,14 @@ export function* register (registerInfo) {
     console.log("register: ", res);
     yield put(signUpSuccess());
     yield delay(1500);
-    window.location.href = '/login'
-
-  }
-  catch (error) {
+    window.location.href = "/login";
+  } catch (error) {
     yield put(signUpFailure(error));
   }
 }
 export function* onSignUpStart() {
   yield takeLatest(UserActionTypes.SIGN_UP_START, register);
 }
-
 
 //save
 const callAPISaveUser = async (userInfo) => {
@@ -99,43 +98,40 @@ const callAPISaveUser = async (userInfo) => {
 
   let formData = new FormData();
   const obj = {
-    userId:userInfo.userId,
-      userFullName: userInfo.userFullName,
+    userId: userInfo.userId,
+    userFullName: userInfo.userFullName,
     userEmail: userInfo.userEmail,
     userPhone: userInfo.userPhone,
     userAddress: userInfo.userAddress,
     userGender: userInfo.userGender,
-    userRole:3
+    userRole: 3,
+  };
+
+  console.log("userInfo.Image", userInfo.Image);
+  if (userInfo.Image === undefined) {
+    const element = userInfo.userAvatar;
+
+    const objImage = { ...obj, userAvatar: element };
+
+    formData.append("userJson", JSON.stringify(objImage));
+  } else {
+    const element = userInfo.Image[0];
+    console.log("element", element);
+    formData.append("files", element);
+    formData.append("userJson", JSON.stringify(obj));
   }
 
-
-  console.log("userInfo.Image",userInfo.Image);
-if(userInfo.Image === undefined){
-  const element = userInfo.userAvatar;
-
-  const objImage = {...obj,userAvatar:element}
-  
-  formData.append("userJson", JSON.stringify(objImage));
- 
-}else{
-  const element = userInfo.Image[0];
-  console.log("element",element);
-   formData.append("files", element);
-   formData.append("userJson", JSON.stringify(obj));
-}
-
-  const res = await api.put("/api/Users/UpdateUser", formData, config);
+  const res = await api.post("/api/Users/UpdateUser", formData, config);
   return res;
 };
 export function* saveUser({ payload: userInfo }) {
-  
   try {
     yield put(saveUserProccesing());
     // Call API tao product:
     const res = yield call(callAPISaveUser, userInfo);
     yield put(saveUserSuccess(res.data));
 
-    window.location.href = '/user/0'
+    window.location.href = "/user/0";
   } catch (error) {
     yield put(saveUserFail(error));
   }
@@ -146,5 +142,9 @@ export function* onCreateProductStart() {
 
 // Call hàm bắt action
 export function* userSaga() {
-  yield all([call(onSignInStart),call(onSignUpStart),call(onCreateProductStart)]);
+  yield all([
+    call(onSignInStart),
+    call(onSignUpStart),
+    call(onCreateProductStart),
+  ]);
 }

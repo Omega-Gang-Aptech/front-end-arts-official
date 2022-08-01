@@ -102,7 +102,7 @@ const EditProduct = ({ title }) => {
   formData.append("files", product.newImage);
 
   const handleEdit = async () => {
-    await api.put("/", formData, config);
+    await api.post("/", formData, config);
     setSuccess(true);
   };
 
