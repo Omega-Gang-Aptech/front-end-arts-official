@@ -45,7 +45,7 @@ const EditCategory = ({ title }) => {
   const [success, setSuccess] = useState(false);
 
   const handleEdit = async () => {
-    await api.put("/", category);
+    await api.post("/", category);
     setSuccess(true);
   };
 

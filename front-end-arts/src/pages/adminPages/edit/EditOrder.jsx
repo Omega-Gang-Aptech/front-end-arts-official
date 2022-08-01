@@ -51,7 +51,7 @@ const EditOrder = ({ title }) => {
   const [success, setSuccess] = useState(false);
 
   const handleEdit = async () => {
-    await api.put("/", order);
+    await api.post("/", order);
     setSuccess(true);
   };
 
